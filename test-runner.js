@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import PQueue from 'p-queue';
-import kill from 'kill-port';
+import find from 'find-process';
 
 function extractPort(output) {
   const portRegex = /(?:localhost|127\.0\.0\.1|0\.0\.0\.0):(\d+)/;
@@ -34,6 +34,24 @@ function runTests(project, processList, ports) {
   });
 }
 
+async function killProcessesOnPorts(ports) {
+  for (const port of ports) {
+    try {
+      const list = await find('port', port);
+      list.forEach(proc => {
+        try {
+          process.kill(proc.pid, 'SIGKILL');
+          console.log(`Killed process ${proc.pid} on port ${port}`);
+        } catch (e) {
+          console.error(`Failed to kill process ${proc.pid} on port ${port}: ${e.message}`);
+        }
+      });
+    } catch (err) {
+      console.error(`Error finding process on port ${port}: ${err.message}`);
+    }
+  }
+}
+
 export async function runAllTests(concurrency, projects) {
   const processList = [];
   const ports = [];
@@ -57,16 +75,8 @@ export async function runAllTests(concurrency, projects) {
       }
     });
 
-    // Kill all ports
-    ports.forEach(port => {
-      kill(port)
-        .then(() => {
-          console.log(`Port ${port} was killed successfully`);
-        })
-        .catch(err => {
-          console.error(`Failed to kill port ${port}: ${err.message}`);
-        });
-    });
+    // Kill all processes on the found ports
+    await killProcessesOnPorts(ports);
 
     console.error(error.message);
     // Exit the process with a failure code
