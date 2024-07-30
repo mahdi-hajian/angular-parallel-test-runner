@@ -1,0 +1,17 @@
+{
+  "name": "parallel-test-runner",
+  "version": "1.0.0",
+  "description": "A tool to run Angular tests in parallel",
+  "main": "index.js",
+  "bin": {
+    "parallel-test-runner": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js"
+  },
+  "dependencies": {
+    "concurrently": "^7.0.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
