@@ -76,7 +76,7 @@ export async function runAllTests(concurrency, projects) {
     });
 
     // Kill all processes on the found ports
-    await killProcessesOnPorts(ports);
+    // await killProcessesOnPorts(ports);
 
     console.error(error.message);
     // Exit the process with a failure code
