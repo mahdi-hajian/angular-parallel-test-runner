@@ -23,7 +23,6 @@ function runTests(project, processList, ports) {
         console.log(`Test results for ${project}:\n${stdout}`);
         const port = extractPort(stdout);
         if (port) {
-          console.log(`Project ${project} is running on port ${port}`);
           ports.push(port);
         }
         resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
@@ -47,7 +46,6 @@ async function killProcessesOnPorts(ports) {
         }
       });
     } catch (err) {
-      console.error(`Error finding process on port ${port}: ${err.message}`);
     }
   }
 }
@@ -57,7 +55,9 @@ export async function runAllTests(concurrency, projects) {
   const ports = [];
   const queue = new PQueue({ concurrency });
 
-  const testPromises = projects.map(project => queue.add(() => runTests(project, processList, ports)));
+  const testPromises = projects.map(project =>
+    queue.add(() => runTests(project, processList, ports))
+  );
 
   try {
     await Promise.all(testPromises);
@@ -81,5 +81,7 @@ export async function runAllTests(concurrency, projects) {
     console.error(error.message);
     // Exit the process with a failure code
     process.exit(1);
+  } finally {
+    queue.clear(); // Clear the queue to prevent further tasks from running
   }
 }
