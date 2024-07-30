@@ -13,5 +13,8 @@
     "concurrently": "^7.0.0"
   },
   "author": "Mahdi Hajian",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/mahdi-hajian/m-parallel-test-runner"
+  }
 }
