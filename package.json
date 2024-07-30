@@ -1,16 +1,18 @@
 {
   "name": "m-parallel-test-runner",
-  "version": "1.0.8",
+  "version": "1.0.928",
   "description": "A tool to run Angular tests in parallel",
   "main": "index.js",
+  "type": "module",
   "bin": {
-    "parallel-test-runner": "./index.js"
+    "m-parallel-test-runner": "./index.js"
   },
   "scripts": {
     "test": "node index.js"
   },
   "dependencies": {
-    "concurrently": "^7.0.0"
+    "concurrently": "^7.0.0",
+    "p-queue": "^8.0.1"
   },
   "author": "Mahdi Hajian",
   "license": "MIT",

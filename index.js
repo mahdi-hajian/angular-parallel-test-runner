@@ -1,15 +1,23 @@
 #!/usr/bin/env node
 
-const concurrently = require('concurrently');
-const runAllTests = require('./test-runner');
-const { execSync } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import concurrently from 'concurrently';
+import { runAllTests } from './test-runner.js';
+import { execSync } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import os from 'os';
 
 // Load Angular projects from angular.json
 const angularJsonPath = path.resolve(process.cwd(), 'angular.json');
 const angularJson = JSON.parse(fs.readFileSync(angularJsonPath, 'utf8'));
 const projects = Object.keys(angularJson.projects);
+
+// Get the number of CPU cores
+const numCPUs = os.cpus().length;
+
+// Get concurrency from command line arguments or default to CPU cores
+const args = process.argv.slice(2);
+const concurrency = args.length > 0 ? parseInt(args[0], 10) : numCPUs;
 
 // Check if concurrently is installed
 try {
@@ -19,5 +27,5 @@ try {
     process.exit(1);
 }
 
-// Run all tests in parallel
-runAllTests(projects);
+// Run all tests with specified concurrency
+runAllTests(concurrency, projects);

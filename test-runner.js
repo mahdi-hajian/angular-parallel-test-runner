@@ -1,30 +1,39 @@
-const { exec } = require('child_process');
+import { exec } from 'child_process';
+import PQueue from 'p-queue';
 
-function runTests(project) {
+function runTests(project, processList) {
   return new Promise((resolve, reject) => {
-    exec(`ng test ${project} --no-watch`, (error, stdout, stderr) => {
-      if(error.message.includes("No inputs were found in config file")){
-        resolve("this library doesn't have any tests");
-      }
-      else if (error) {
-        console.error(`Error running tests for ${project}: ${error.message}`);
-        reject(error);
+    const testProcess = exec(`ng test ${project} --no-watch`, (error, stdout, stderr) => {
+      if (error) {
+        if (error.message.includes("No inputs were found in config file")) {
+          console.log(`Project ${project}: No tests found.`);
+          resolve(`Project ${project}: No tests found.`);
+        } else {
+          console.error(`Error running tests for ${project}: ${error.message}`);
+          reject(`Project ${project}: Error running tests - ${error.message}`);
+        }
       } else {
         console.log(`Test results for ${project}:\n${stdout}`);
-        resolve(stdout);
+        resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
       }
     });
+
+    processList.push(testProcess);
   });
 }
 
-async function runAllTests(projects) {
-  const testPromises = projects.map(project => runTests(project));
+export async function runAllTests(concurrency, projects) {
+  const processList = [];
+  const queue = new PQueue({ concurrency });
+
   try {
-    const results = await Promise.all(testPromises);
+    const testPromises = projects.map(project => queue.add(() => runTests(project, processList)));
+    await Promise.all(testPromises);
     console.log('All tests completed successfully');
   } catch (error) {
-    console.error('Some tests failed');
+    console.error('Some tests failed, aborting all tests');
+    processList.forEach(proc => proc.kill());
+    console.error(error);
+    process.exit(1);
   }
 }
-
-module.exports = runAllTests;
