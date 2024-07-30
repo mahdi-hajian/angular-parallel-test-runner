@@ -1,5 +1,5 @@
 {
-  "name": "parallel-test-runner",
+  "name": "m-parallel-test-runner",
   "version": "1.0.0",
   "description": "A tool to run Angular tests in parallel",
   "main": "index.js",
@@ -12,6 +12,6 @@
   "dependencies": {
     "concurrently": "^7.0.0"
   },
-  "author": "Your Name",
+  "author": "Mahdi Hajian",
   "license": "MIT"
 }
