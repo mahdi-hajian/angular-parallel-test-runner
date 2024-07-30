@@ -13,10 +13,10 @@ const projects = Object.keys(angularJson.projects);
 
 // Check if concurrently is installed
 try {
-  execSync('npx concurrently -v');
+    execSync('npx concurrently -v');
 } catch (e) {
-  console.error('Error: concurrently is not installed. Run "npm install concurrently" to install it.');
-  process.exit(1);
+    console.error('Error: concurrently is not installed. Run "npm install concurrently" to install it.');
+    process.exit(1);
 }
 
 // Run all tests in parallel

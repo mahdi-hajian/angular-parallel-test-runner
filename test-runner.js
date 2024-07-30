@@ -2,8 +2,8 @@ const { exec } = require('child_process');
 
 function runTests(project) {
   return new Promise((resolve, reject) => {
-    exec(`ng test ${project} --watch=false --browsers=ChromeHeadless`, (error, stdout, stderr) => {
-      if (error) {
+    exec(`ng test ${project}`, (error, stdout, stderr) => {
+      if (error && !error.message.includes("No inputs were found in config file")) {
         console.error(`Error running tests for ${project}: ${error.message}`);
         reject(error);
       } else {
