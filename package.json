@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "concurrently": "^7.0.0",
+    "kill-port": "^2.0.1",
     "p-queue": "^8.0.1"
   },
   "author": "Mahdi Hajian",
