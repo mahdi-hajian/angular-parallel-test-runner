@@ -18,8 +18,23 @@ const defaultConcurrency = Math.max(1, Math.floor(numCPUs / 3)); // Set default 
 
 // Get concurrency and continueOnFailure from command line arguments or default values
 const args = process.argv.slice(2);
-const concurrency = args.length > 0 ? parseInt(args[0], 10) : defaultConcurrency;
-const continueOnFailure = args.length > 1 ? args[1].toLowerCase() === 'true' : true;
+
+let concurrency = defaultConcurrency;
+let continueOnFailure = true;
+
+if (args.length > 0) {
+    if (args[0].toLowerCase() === 'true' || args[0].toLowerCase() === 'false') {
+        continueOnFailure = args[0].toLowerCase() === 'true';
+        if (args.length > 1) {
+            concurrency = parseInt(args[1], 10);
+        }
+    } else {
+        concurrency = parseInt(args[0], 10);
+        if (args.length > 1) {
+            continueOnFailure = args[1].toLowerCase() === 'true';
+        }
+    }
+}
 
 // Check if concurrently is installed
 try {
