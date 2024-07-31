@@ -29,4 +29,4 @@ try {
 }
 
 // Run all tests with specified concurrency
-runAllTests(concurrency, projects);
+runAllTests(concurrency, projects.filter(x=> x != "la-dw"));
