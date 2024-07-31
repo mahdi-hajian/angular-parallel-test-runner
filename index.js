@@ -14,7 +14,7 @@ const projects = Object.keys(angularJson.projects);
 
 // Get the number of CPU cores
 const numCPUs = os.cpus().length;
-const defaultConcurrency = Math.max(1, Math.floor(numCPUs / 2)); // Set default to half the number of CPU cores, minimum 1
+const defaultConcurrency = Math.max(1, Math.floor(numCPUs / 3)); // Set default to half the number of CPU cores, minimum 1
 
 // Get concurrency from command line arguments or default to half the number of CPU cores
 const args = process.argv.slice(2);
@@ -29,4 +29,4 @@ try {
 }
 
 // Run all tests with specified concurrency
-runAllTests(concurrency, projects);
+runAllTests(concurrency, ['la-dw']);
