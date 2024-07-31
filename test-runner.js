@@ -59,8 +59,12 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
   );
 
   try {
-    await Promise.allSettled(testPromises);
-    console.log(chalk.green('All tests completed successfully'));
+    if (!continueOnFailure) {
+      await Promise.all(testPromises);
+    }
+    else {
+      await Promise.allSettled(testPromises);
+    }
   } catch (error) {
     if (!continueOnFailure) {
       console.error(chalk.red('Some tests failed, aborting all tests'));
@@ -91,7 +95,7 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
     console.log(chalk.yellow(`Projects with no tests: ${results.noTests.join(', ')}`));
     console.log(chalk.green(`Projects with successful tests: ${results.successfulTests.join(', ')}`));
     console.log(chalk.red(`Projects with failed tests: ${results.failedTests.join(', ')}`));
-    
+
     if (!continueOnFailure) {
       console.log(chalk.blue(`Projects with unfinished tests: ${projects.filter(project =>
         !results.noTests.includes(project) &&
@@ -99,7 +103,7 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
         !results.failedTests.includes(project)
       ).join(', ')}`));
     }
-    
+
     if (!continueOnFailure) {
       queue.clear();
       process.exit(results.failedTests.length > 0 ? 1 : 0);
