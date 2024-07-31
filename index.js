@@ -29,4 +29,4 @@ try {
 }
 
 // Run all tests with specified concurrency
-runAllTests(concurrency, ['la-dw']);
+runAllTests(concurrency, projects);
