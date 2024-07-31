@@ -24,10 +24,8 @@ function runTests(project, processList, ports, results) {
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
       } else {
-
         const splStdOut = stdout.split("TOTAL: ");
         const countOfTests = splStdOut[splStdOut.length - 1].split(" ")[0];
-
         console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
         const port = extractPort(stdout);
         if (port) {
@@ -42,7 +40,7 @@ function runTests(project, processList, ports, results) {
   });
 }
 
-export async function runAllTests(concurrency, projects) {
+export async function runAllTests(concurrency, continueOnFailure, projects) {
   const processList = [];
   const ports = [];
   const queue = new PQueue({ concurrency });
@@ -62,19 +60,20 @@ export async function runAllTests(concurrency, projects) {
     await Promise.all(testPromises);
     console.log(chalk.green('All tests completed successfully'));
   } catch (error) {
-    console.error(chalk.red('Some tests failed, aborting all tests'));
-    processList.forEach(proc => {
-      try {
-        if (proc && proc.kill) {
-          proc.kill('SIGINT');
+    if (!continueOnFailure) {
+      console.error(chalk.red('Some tests failed, aborting all tests'));
+      processList.forEach(proc => {
+        try {
+          if (proc && proc.kill) {
+            proc.kill('SIGINT');
+          }
+        } catch (e) {
+          console.error(chalk.red(`Failed to kill process: ${e.message}`));
         }
-      } catch (e) {
-        console.error(chalk.red(`Failed to kill process: ${e.message}`));
-      }
-    });
-    console.error(chalk.red(error.message));
+      });
+      console.error(chalk.red(error.message));
+    }
   } finally {
-
     // Log the summary
     console.log(chalk.bold('Test Summary:'));
     console.log(chalk.yellow(`Projects with no tests: ${results.noTests.join(', ')}`));
