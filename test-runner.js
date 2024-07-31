@@ -8,7 +8,7 @@ function extractPort(output) {
   return match ? match[1] : null;
 }
 
-function runTests(project, processList, ports, results) {
+function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
     const testProcess = exec(`ng test ${project} --no-watch`, (error, stdout, stderr) => {
       if (error) {
@@ -19,7 +19,8 @@ function runTests(project, processList, ports, results) {
           results.noTests.push(project);
           resolve(`Project ${project}: No tests found.`);
         } else {
-          console.error(chalk.red(`Test results for ${project}:\n${stdout}`));
+          console.error(chalk.red(`Project ${project}: Error running tests`));
+          errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout}`));
           results.failedTests.push(project);
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
@@ -44,6 +45,7 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
   const processList = [];
   const ports = [];
   const queue = new PQueue({ concurrency });
+  const errorLogs = [];
 
   const results = {
     noTests: [],
@@ -53,11 +55,11 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
   };
 
   const testPromises = projects.map(project =>
-    queue.add(() => runTests(project, processList, ports, results))
+    queue.add(() => runTests(project, processList, ports, results, errorLogs))
   );
 
   try {
-    await Promise.all(testPromises);
+    await Promise.allSettled(testPromises);
     console.log(chalk.green('All tests completed successfully'));
   } catch (error) {
     if (!continueOnFailure) {
@@ -74,18 +76,33 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
       console.error(chalk.red(error.message));
     }
   } finally {
+
+    // Print error logs at the end
+    if (errorLogs.length > 0) {
+      console.log(chalk.red('\nError Logs:'));
+      errorLogs.forEach(log => {
+        console.error(log);
+        console.log(chalk.bold('----------------------------------------------------------------'));
+      });
+    }
+
     // Log the summary
     console.log(chalk.bold('Test Summary:'));
     console.log(chalk.yellow(`Projects with no tests: ${results.noTests.join(', ')}`));
     console.log(chalk.green(`Projects with successful tests: ${results.successfulTests.join(', ')}`));
     console.log(chalk.red(`Projects with failed tests: ${results.failedTests.join(', ')}`));
-    console.log(chalk.blue(`Projects with unfinished tests: ${projects.filter(project =>
-      !results.noTests.includes(project) &&
-      !results.successfulTests.includes(project) &&
-      !results.failedTests.includes(project)
-    ).join(', ')}`));
-
-    queue.clear();
-    process.exit(results.failedTests.length > 0 ? 1 : 0);
+    
+    if (!continueOnFailure) {
+      console.log(chalk.blue(`Projects with unfinished tests: ${projects.filter(project =>
+        !results.noTests.includes(project) &&
+        !results.successfulTests.includes(project) &&
+        !results.failedTests.includes(project)
+      ).join(', ')}`));
+    }
+    
+    if (!continueOnFailure) {
+      queue.clear();
+      process.exit(results.failedTests.length > 0 ? 1 : 0);
+    }
   }
 }
