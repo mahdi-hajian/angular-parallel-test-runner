@@ -92,9 +92,21 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
 
     // Log the summary
     console.log(chalk.bold('Test Summary:'));
-    console.log(chalk.yellow(`Projects with no tests: ${results.noTests.join(', ')}`));
-    console.log(chalk.green(`Projects with successful tests: ${results.successfulTests.join(', ')}`));
-    console.log(chalk.red(`Projects with failed tests: ${results.failedTests.join(', ')}`));
+
+    const noTests = results.noTests.join(', ');
+    if (noTests.length > 0) {
+      console.log(chalk.yellow(`Projects with no tests: ${noTests}`));
+    }
+
+    const successfulTests = results.successfulTests.join(', ');
+    if (successfulTests.length > 0) {
+      console.log(chalk.green(`Projects with successful tests: ${successfulTests}`));
+    }
+
+    const failedTests = results.failedTests.join(', ');
+    if (failedTests.length > 0) {
+      console.log(chalk.red(`Projects with failed tests: ${failedTests}`));
+    }
 
     if (!continueOnFailure) {
       console.log(chalk.blue(`Projects with unfinished tests: ${projects.filter(project =>
