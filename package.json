@@ -1,6 +1,6 @@
 {
   "name": "angular-parallel-test-runner",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "A tool to run Angular tests in parallel",
   "main": "index.js",
   "type": "module",
@@ -19,5 +19,20 @@
   "license": "MIT",
   "repository": {
     "url": "https://github.com/mahdi-hajian/angular-parallel-test-runner"
-  }
+  },
+  "keywords": [
+    "angular",
+    "testing",
+    "karma",
+    "jasmine",
+    "parallel testing",
+    "parallel test runner",
+    "parallel",
+    "test runner",
+    "concurrency",
+    "cli",
+    "tool",
+    "nodejs",
+    "javascript"
+  ]
 }
