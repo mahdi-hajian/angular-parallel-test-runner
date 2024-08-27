@@ -77,10 +77,6 @@ Contributions are welcome! Please check the [repository](https://github.com/mahd
 4. Push to the branch (`git push origin feature/YourFeature`).
 5. Create a new Pull Request.
 
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/mahdi-hajian/angular-parallel-test-runner/blob/main/LICENSE) file for more information.
-
 ---
 
 **Author**: Mahdi Hajian

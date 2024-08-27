@@ -118,7 +118,7 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
 
     if (!continueOnFailure) {
       queue.clear();
-      process.exit(results.failedTests.length > 0 ? 1 : 0);
     }
+    process.exit(results.failedTests.length > 0 ? 1 : 0);
   }
 }
