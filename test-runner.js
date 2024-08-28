@@ -106,6 +106,9 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
     const failedTests = results.failedTests.join(', ');
     if (failedTests.length > 0) {
       console.log(chalk.red(`Projects with failed tests: ${failedTests}`));
+      if (continueOnFailure) {
+        process.exit(1);
+      }
     }
 
     if (!continueOnFailure) {
@@ -118,7 +121,7 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
 
     if (!continueOnFailure) {
       queue.clear();
+      process.exit(results.failedTests.length > 0 ? 1 : 0);
     }
-    process.exit(results.failedTests.length > 0 ? 1 : 0);
   }
 }
