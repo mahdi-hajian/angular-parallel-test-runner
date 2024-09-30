@@ -11,22 +11,27 @@ function extractPort(output) {
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
     const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, (error, stdout, stderr) => {
-      if (error) {
+      const splWithTotal = stdout.split("TOTAL: ");
+      if (error && 
+        (splWithTotal.length >= 2 &&
+        splWithTotal[splWithTotal.length-1].includes(" FAILED"))
+      ) {
         if (error.message.includes("No inputs were found in config file") ||
           (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !stdout.includes(" FAILED"))
         ) {
           console.log(chalk.yellow(`Project ${project}: No tests found.`));
           results.noTests.push(project);
           resolve(`Project ${project}: No tests found.`);
-        } else {
+        } 
+        else {
           console.error(chalk.red(`Project ${project}: Error running tests`));
           errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout}`));
           results.failedTests.push(project);
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
-      } else {
-        const splStdOut = stdout.split("TOTAL: ");
-        const countOfTests = splStdOut[splStdOut.length - 1].split(" ")[0];
+      } 
+      else {
+        const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
         console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
         const port = extractPort(stdout);
         if (port) {
