@@ -10,7 +10,7 @@ function extractPort(output) {
 
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
-    const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, { maxBuffer: 4000000 }, (error, stdout, stderr) => {
+    const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
       if (error) {
         if (error.message.includes("No inputs were found in config file") ||
           (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !stdout.includes(" FAILED"))
