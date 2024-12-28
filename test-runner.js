@@ -8,18 +8,20 @@ function extractPort(output) {
   return match ? match[1] : null;
 }
 
+const pattern = new RegExp(/TOTAL: \d+ FAILED/);
+
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
     const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
       if (error) {
         if (error.message.includes("No inputs were found in config file") ||
-          (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !stdout.includes(" FAILED"))
+          (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !pattern.test(stdout))
         ) {
           console.log(chalk.yellow(`Project ${project}: No tests found.`));
           results.noTests.push(project);
           resolve(`Project ${project}: No tests found.`);
         }
-        else if (!stdout.includes(" FAILED) ") && !stdout.includes("ERROR [karma-server]: Error: Found ")) {
+        else if (!pattern.test(stdout) && !stdout.includes("ERROR [karma-server]: Error: Found ")) {
           const splWithTotal = stdout.split("TOTAL: ");
           const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
           console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
