@@ -1,6 +1,6 @@
 {
   "name": "angular-parallel-test-runner",
-  "version": "2.3.3",
+  "version": "2.4.1",
   "description": "A tool to run Angular tests in parallel",
   "main": "index.js",
   "type": "module",
