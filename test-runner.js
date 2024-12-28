@@ -20,9 +20,9 @@ function runTests(project, processList, ports, results, errorLogs) {
           resolve(`Project ${project}: No tests found.`);
         } 
         else {
-          console.error(chalk.red(`Project ${project}: Error running tests`));
           errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout}`));
           results.failedTests.push(project);
+          console.log(chalk.red(`Project ${project}: Error running tests - ${error.message}`));
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
       } 
