@@ -45,4 +45,4 @@ try {
 }
 
 // Run all tests with specified concurrency
-runAllTests(concurrency, continueOnFailure, projects.filter(x=> !['dap', 'iap'].includes(x.toLowerCase())));
+runAllTests(concurrency, continueOnFailure, projects.filter(x=> !['iap'].includes(x.toLowerCase())));
