@@ -10,6 +10,19 @@ function extractPort(output) {
 
 const pattern = new RegExp(/TOTAL: \d+ FAILED/);
 
+
+function successAction(stdout, project, ports, results, resolve) {
+  const splWithTotal = stdout.split("TOTAL: ");
+  const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
+  console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
+  const port = extractPort(stdout);
+  if (port) {
+    ports.push(port);
+  }
+  results.successfulTests.push(project);
+  resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
+}
+
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
     const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
@@ -22,33 +35,16 @@ function runTests(project, processList, ports, results, errorLogs) {
           resolve(`Project ${project}: No tests found.`);
         }
         else if (!pattern.test(stdout) && !stdout.includes("ERROR [karma-server]: Error: Found ")) {
-          const splWithTotal = stdout.split("TOTAL: ");
-          const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
-          console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
-          const port = extractPort(stdout);
-          if (port) {
-            ports.push(port);
-          }
-          results.successfulTests.push(project);
-          resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
+          successAction(stdout, project, ports, results, resolve);
         }
         else {
-          errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout}`));
+          errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout} \n\n${error.message}`));
           results.failedTests.push(project);
-          console.log(chalk.red(`Project ${project}: Error running tests - ${error.message}`));
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
       }
       else {
-        const splWithTotal = stdout.split("TOTAL: ");
-        const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
-        console.log(chalk.green(`Project ${project}: ${countOfTests} Tests passed successfully`));
-        const port = extractPort(stdout);
-        if (port) {
-          ports.push(port);
-        }
-        results.successfulTests.push(project);
-        resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
+        successAction(stdout, project, ports, results, resolve);
       }
     });
 
