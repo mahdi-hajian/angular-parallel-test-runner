@@ -10,7 +10,6 @@ function extractPort(output) {
 
 const pattern = new RegExp(/TOTAL: \d+ FAILED/);
 
-
 function successAction(stdout, project, ports, results, resolve) {
   const splWithTotal = stdout.split("TOTAL: ");
   const countOfTests = splWithTotal[splWithTotal.length - 1].split(" ")[0];
@@ -25,7 +24,8 @@ function successAction(stdout, project, ports, results, resolve) {
 
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
-    const testProcess = exec(`ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch `, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
+    const command = `ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch`;
+    const testProcess = exec(command, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
       if (error) {
         if (error.message.includes("No inputs were found in config file") ||
           (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !pattern.test(stdout))
@@ -38,7 +38,12 @@ function runTests(project, processList, ports, results, errorLogs) {
           successAction(stdout, project, ports, results, resolve);
         }
         else {
-          errorLogs.push(chalk.red(`Test results for ${project}:\n${stdout} \n\n${error.message}`));
+          let message = `Test results for ${project}:\n${stdout}`;
+          if(!error.message.includes(command)){
+            message += ` \n\n${error.message}`
+          }
+
+          errorLogs.push(chalk.red(message));
           results.failedTests.push(project);
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
         }
