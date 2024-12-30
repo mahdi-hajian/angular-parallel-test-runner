@@ -25,7 +25,7 @@ function successAction(stdout, project, ports, results, resolve) {
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
     const command = `ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch`;
-    const testProcess = exec(command, { maxBuffer: 9000000 }, (error, stdout, stderr) => {
+    const testProcess = exec(command, { maxBuffer: 3000000 }, (error, stdout, stderr) => {
       if (error) {
         if (error.message.includes("No inputs were found in config file") ||
           (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !pattern.test(stdout))
@@ -39,10 +39,7 @@ function runTests(project, processList, ports, results, errorLogs) {
         }
         else {
           let message = `Test results for ${project}:\n${stdout}`;
-          if(!error.message.includes(command)){
-            message += ` \n\n${error.message}`
-          }
-
+          message += ` \n\n${error.message}`
           errorLogs.push(chalk.red(message));
           results.failedTests.push(project);
           reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
