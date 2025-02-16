@@ -24,7 +24,7 @@ function successAction(stdout, project, ports, results, resolve) {
 
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
-    const command = `ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch --code-coverage`;
+    const command = `ng test ${project} --browsers ChromeHeadlessNoSandbox -c withConfig`;
     const testProcess = exec(command, { maxBuffer: 3000000 }, (error, stdout, stderr) => {
       if (error) {
         if (error.message.includes("No inputs were found in config file") ||
