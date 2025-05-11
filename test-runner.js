@@ -22,37 +22,47 @@ function successAction(stdout, project, ports, results, resolve) {
   resolve(`Project ${project}: Tests passed successfully.\n${stdout}`);
 }
 
+function grepShouldAndFailed(output) {
+  return output
+      .split('\n')
+      .filter((line) => /should/i.test(line) && /failed/i.test(line))
+      .join('\n');
+}
+
+
 function runTests(project, processList, ports, results, errorLogs) {
   return new Promise((resolve, reject) => {
-    const command = `cross-env COVERAGE_PROJECT=${project} ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch -c withConfig`;
-    const testProcess = exec(command, { maxBuffer: 6000000}, (error, stdout, stderr) => {
-      if (error) {
-        if (error.message.includes("No inputs were found in config file") ||
-          (stdout.includes("Executed 0 of ") && stdout.includes("0 SUCCESS") && !pattern.test(stdout))
-        ) {
-          console.log(chalk.yellow(`Project ${project}: No tests found.`));
-          results.noTests.push(project);
-          resolve(`Project ${project}: No tests found.`);
-        }
-        else if (!pattern.test(stdout) && !stdout.includes("ERROR [karma-server]: Error: Found ")) {
-          successAction(stdout, project, ports, results, resolve);
-        }
-        else {
-          let message = `Test results for ${project}:\n${stdout}`;
-          message += ` \n\n${error.message}`
-          errorLogs.push(chalk.red(message));
-          results.failedTests.push(project);
-          reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
-        }
-      }
-      else {
-        successAction(stdout, project, ports, results, resolve);
-      }
-    });
+      const command = `cross-env COVERAGE_PROJECT=${project} ng test ${project} --browsers ChromeHeadlessNoSandbox --no-watch -c withConfig`;
+      const testProcess = exec(command, {maxBuffer: 6000000}, (error, stdout, stderr) => {
+          if (error) {
+              if (
+                  error.message.includes('No inputs were found in config file') ||
+                  (stdout.includes('Executed 0 of ') && stdout.includes('0 SUCCESS') && !pattern.test(stdout))
+              ) {
+                  console.log(`Project ${project}: No tests found.`);
+                  results.noTests.push(project);
+                  resolve(`Project ${project}: No tests found.`);
+              } else if (!pattern.test(stdout) && !stdout.includes('ERROR [karma-server]: Error: Found ')) {
+                  successAction(stdout, project, ports, results, resolve);
+              } else {
+                  let message = `Test results for ${project}:`;
+                  message += ` \n\n${error.message}`;
+                  message = grepShouldAndFailed(stdout.toLowerCase()) + '\n\n'+message;
+                  errorLogs.push(message);
+                  results.failedTests.push(project);
+                  console.log(chalk.red(`Project ${project}: Error running tests.`));
+                  reject(new Error(`Project ${project}: Error running tests - ${error.message}`));
+              }
+          } else {
+              successAction(stdout, project, ports, results, resolve);
+          }
+      });
 
-    processList.push(testProcess);
+      processList.push(testProcess);
   });
 }
+
+
 
 export async function runAllTests(concurrency, continueOnFailure, projects) {
   const processList = [];
@@ -93,7 +103,6 @@ export async function runAllTests(concurrency, continueOnFailure, projects) {
       console.error(chalk.red(error.message));
     }
   } finally {
-
     // Print error logs at the end
     if (errorLogs.length > 0) {
       console.log(chalk.red('\nError Logs:'));
