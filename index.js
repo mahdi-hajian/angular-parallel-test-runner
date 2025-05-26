@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import concurrently from 'concurrently';
 import { runAllTests } from './test-runner.js';
 import { execSync } from 'child_process';
 import path from 'path';
