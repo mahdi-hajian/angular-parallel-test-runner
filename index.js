@@ -6,34 +6,59 @@ import { execSync } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import yargs from 'yargs/yargs';
+import { hideBin } from 'yargs/helpers';
 
 // Load Angular projects from angular.json
 const angularJsonPath = path.resolve(process.cwd(), 'angular.json');
+if (!fs.existsSync(angularJsonPath)) {
+    console.error('angular.json not found in the current directory.');
+    process.exit(1);
+}
+
 const angularJson = JSON.parse(fs.readFileSync(angularJsonPath, 'utf8'));
-const projects = Object.keys(angularJson.projects);
+const allProjects = Object.keys(angularJson.projects);
 
-// Get the number of CPU cores
+// Get number of CPU cores
 const numCPUs = os.cpus().length;
-const defaultConcurrency = Math.max(1, Math.floor(numCPUs / 2)); // Set default to half the number of CPU cores, minimum 1
+const defaultConcurrency = Math.max(1, Math.floor(numCPUs / 2));
 
-// Get concurrency and continueOnFailure from command line arguments or default values
-const args = process.argv.slice(2);
+// Parse CLI arguments using yargs
+const argv = yargs(hideBin(process.argv))
+    .option('concurrency', {
+        alias: 'c',
+        type: 'number',
+        description: 'Number of concurrent test runners',
+        default: defaultConcurrency,
+    })
+    .option('continueOnFailure', {
+        alias: 'f',
+        type: 'boolean',
+        description: 'Continue running tests even if one fails',
+        default: true,
+    })
+    .option('onlyProjects', {
+        alias: 'o',
+        type: 'string',
+        description: 'Comma-separated list of projects to test',
+    })
+    .option('skipProjects', {
+        alias: 's',
+        type: 'string',
+        description: 'Comma-separated list of projects to skip',
+    })
+    .help()
+    .argv;
 
-let concurrency = defaultConcurrency;
-let continueOnFailure = true;
+// Determine projects to test
+let projects = allProjects;
 
-if (args.length > 0) {
-    if (args[0].toLowerCase() === 'true' || args[0].toLowerCase() === 'false') {
-        continueOnFailure = args[0].toLowerCase() === 'true';
-        if (args.length > 1) {
-            concurrency = parseInt(args[1], 10);
-        }
-    } else {
-        concurrency = parseInt(args[0], 10);
-        if (args.length > 1) {
-            continueOnFailure = args[1].toLowerCase() === 'true';
-        }
-    }
+if (argv.onlyProjects) {
+    const onlyList = argv.onlyProjects.split(',').map(p => p.trim());
+    projects = allProjects.filter(p => onlyList.includes(p));
+} else if (argv.skipProjects) {
+    const skipList = argv.skipProjects.split(',').map(p => p.trim());
+    projects = allProjects.filter(p => !skipList.includes(p));
 }
 
 // Check if concurrently is installed
@@ -44,5 +69,5 @@ try {
     process.exit(1);
 }
 
-// Run all tests with specified concurrency
-runAllTests(concurrency, continueOnFailure, projects);
+// Run tests
+runAllTests(argv.concurrency, argv.continueOnFailure, projects);
