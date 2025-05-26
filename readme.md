@@ -4,13 +4,13 @@
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Options](#options)
-- [Examples](#examples)
-- [How It Works](#how-it-works)
-- [Contributing](#contributing)
-- [License](#license)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Options](#options)
+* [Examples](#examples)
+* [How It Works](#how-it-works)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## Installation
 
@@ -31,15 +31,20 @@ npm install concurrently
 To run tests across all Angular projects defined in your `angular.json` file:
 
 ```bash
-angular-parallel-test-runner [continueOnFailure] [concurrency]
+angular-parallel-test-runner [options]
 ```
 
 ### Options
 
-- **`continueOnFailure`**: (Optional) Specifies whether to continue running tests even if some fail. Accepts `true` or `false`. Defaults to `true`.
-- **`concurrency`**: (Optional) Specifies the number of concurrent test processes to run. If not provided, defaults to a value based on your system's CPU cores.
+| Option                | Alias | Type    | Default                     | Description                                                          |
+| --------------------- | ----- | ------- | --------------------------- | -------------------------------------------------------------------- |
+| `--concurrency`       | `-c`  | number  | Half of available CPU cores | Number of concurrent test runners                                    |
+| `--continueOnFailure` | `-f`  | boolean | `true`                      | Whether to continue if a test fails                                  |
+| `--onlyProjects`      | `-o`  | string  |                             | Comma-separated list of projects to test (only these will be tested) |
+| `--skipProjects`      | `-s`  | string  |                             | Comma-separated list of projects to skip from testing                |
+| `--help`              |       | boolean |                             | Show help and usage instructions                                     |
 
-### Examples
+## Examples
 
 1. **Run with default settings:**
 
@@ -47,16 +52,28 @@ angular-parallel-test-runner [continueOnFailure] [concurrency]
    angular-parallel-test-runner
    ```
 
-2. **Run with custom concurrency level and continue on failure:**
+2. **Run with custom concurrency and allow all tests to finish even if some fail:**
 
    ```bash
-   angular-parallel-test-runner true 4
+   angular-parallel-test-runner --concurrency=4 --continueOnFailure=true
    ```
 
-3. **Run with stopping on the first failure and default concurrency:**
+3. **Run and stop at the first failed test:**
 
    ```bash
-   angular-parallel-test-runner false
+   angular-parallel-test-runner --continueOnFailure=false
+   ```
+
+4. **Run tests only for specific projects:**
+
+   ```bash
+   angular-parallel-test-runner --onlyProjects=project1,project2
+   ```
+
+5. **Skip specific projects:**
+
+   ```bash
+   angular-parallel-test-runner --skipProjects=project3,project4
    ```
 
 ## How It Works
@@ -82,3 +99,6 @@ Contributions are welcome! Please check the [repository](https://github.com/mahd
 **Author**: Mahdi Hajian
 
 Feel free to reach out with any questions or suggestions!
+
+---
+
