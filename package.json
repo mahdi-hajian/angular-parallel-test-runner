@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
-    "p-queue": "^8.0.1"
+    "p-queue": "^8.0.1",
+    "yargs": "^17.7.2"
   },
   "author": "Mahdi Hajian",
   "license": "MIT",
